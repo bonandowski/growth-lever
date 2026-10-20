@@ -239,3 +239,47 @@ h1 em { color: var(--accent); }
   .sources th, .sources td { border: 0; padding: 2px 0; }
 }
 .onboarding.prerender { justify-content: flex-start; padding-top: 22vh; }
+
+/* joke paywall: the page fades out like a news article, a paper sheet slides up */
+.paywall-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: linear-gradient(to bottom, rgba(17, 18, 18, 0) 0%, rgba(17, 18, 18, 0.75) 35%, rgba(17, 18, 18, 0.97) 70%);
+  backdrop-filter: blur(2px);
+  animation: fade-in 0.3s ease-out;
+}
+.paywall {
+  width: min(640px, 100%);
+  background: #f6f1e7;
+  color: #1c1a17;
+  border-radius: 18px 18px 0 0;
+  padding: 26px clamp(20px, 5vw, 44px) 30px;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.45);
+  border-top: 5px solid var(--accent);
+  animation: slide-up 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.paywall-meter { font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #8a5a2b; font-weight: 600; }
+.paywall h2 { margin-top: 8px; font-weight: 400; font-size: clamp(28px, 4.4vw, 40px); line-height: 1.05; letter-spacing: -0.02em; font-variation-settings: 'opsz' 144; }
+.paywall-price { margin-top: 10px; font-size: 16px; color: #6d675d; }
+.paywall-price span { color: #1c1a17; }
+.paywall-text { margin-top: 16px; font-size: 17px; line-height: 1.45; border-top: 1px solid #ddd3c2; padding-top: 16px; }
+.paywall-text em { color: #b04e00; }
+.paywall-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #1c1a17;
+  color: #f6f1e7;
+  font-size: 17px;
+}
+.paywall-btn:hover { background: #000; }
+.paywall-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.paywall-fine { margin-top: 10px; text-align: center; font-size: 12.5px; color: #8b8478; font-style: italic; }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes slide-up { from { transform: translateY(100%); } }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { equivalentPush, insight, leverImpacts, pushLever, simulate, type Lever } from './model';
 import { ASSUMPTIONS, LEVER_SUBJECT, PRESET_LABEL, UNIT_N, refPhrase } from './copy';
 import { eur } from './format';
@@ -8,11 +8,15 @@ import { Bucket } from './components/Bucket';
 import { LeverButtons } from './components/LeverButtons';
 import { NumbersPanel } from './components/NumbersPanel';
 import { Onboarding } from './components/Onboarding';
+import { Paywall } from './components/Paywall';
 
 export default function App() {
   const [state, setState] = useState<AppState>(() => readState(window.location.search));
   const [panel, setPanel] = useState(false);
   const [copied, setCopied] = useState(false);
+  // the joke paywall shows once per visit, on the first lever click; nothing is stored
+  const [paywall, setPaywall] = useState<'pending' | 'open' | 'done'>('pending');
+  const closePaywall = useCallback(() => setPaywall('done'), []);
   const { inputs, lever } = state;
 
   useEffect(() => {
@@ -118,7 +122,15 @@ export default function App() {
         </section>
       </main>
 
-      <LeverButtons impacts={impacts} selected={lever} onSelect={(l) => setState((s) => ({ ...s, lever: l }))} />
+      <LeverButtons
+        impacts={impacts}
+        selected={lever}
+        onSelect={(l) => {
+          setState((s) => ({ ...s, lever: l }));
+          if (l && paywall === 'pending') setPaywall('open');
+        }}
+      />
+      {paywall === 'open' && <Paywall onClose={closePaywall} />}
 
       <div className="extras">
         <button type="button" className="link" aria-expanded={panel} aria-controls="numbers" onClick={() => setPanel((v) => !v)}>
