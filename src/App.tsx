@@ -105,19 +105,21 @@ export default function App() {
             <div><dt>Payback CAC</dt><dd>{shown.payback === null ? 'oltre 24 mesi' : `${shown.payback} mesi`}</dd></div>
           </dl>
         </section>
+        <div className="levers-area">
+        <LeverButtons
+          impacts={impacts}
+          selected={lever}
+          onSelect={(l) => {
+            setState((s) => ({ ...s, lever: l }));
+            if (l && paywall === 'pending') {
+              setPaywall('open');
+              markPaywallSeen();
+            }
+          }}
+        />
+        </div>
       </main>
 
-      <LeverButtons
-        impacts={impacts}
-        selected={lever}
-        onSelect={(l) => {
-          setState((s) => ({ ...s, lever: l }));
-          if (l && paywall === 'pending') {
-            setPaywall('open');
-            markPaywallSeen();
-          }
-        }}
-      />
       {paywall === 'open' && <Paywall onClose={closePaywall} />}
 
       {/* on small screens, type and data notice live here instead of above the bucket */}

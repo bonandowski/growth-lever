@@ -41,12 +41,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .banner strong { color: var(--ink); font-weight: 500; }
 
-.main { display: grid; gap: 8px; padding: 24px 0 8px; grid-template-areas: 'hero' 'scene' 'verdict'; }
+.main { display: grid; gap: 8px; padding: 24px 0 8px; grid-template-areas: 'hero' 'scene' 'levers' 'verdict'; }
+.levers-area { grid-area: levers; }
 .hero { grid-area: hero; }
 .scene { grid-area: scene; }
 .verdict { grid-area: verdict; }
 @media (min-width: 960px) {
-  .main { grid-template-columns: 0.8fr 1.2fr; grid-template-rows: auto 1fr; column-gap: 56px; row-gap: 0; grid-template-areas: 'hero scene' 'verdict scene'; align-items: start; }
+  .main { grid-template-columns: 0.8fr 1.2fr; grid-template-rows: auto 1fr auto; column-gap: 56px; row-gap: 0; grid-template-areas: 'hero scene' 'verdict scene' 'levers levers'; align-items: start; }
   .hero { align-self: end; padding-top: 40px; }
 }
 
@@ -71,7 +72,8 @@ h1 em { color: var(--accent); }
   .main { padding-top: 10px; }
   h1 { font-size: 30px; }
   .sub { font-size: 16px; margin-top: 8px; }
-  .verdict { margin-top: 4px; padding-top: 14px; }
+  .verdict { margin-top: 0; padding-top: 14px; }
+  .levers { padding-bottom: 12px; }
   .verdict-text { font-size: 21px; }
   .verdict-sub { font-size: 14px; }
 }
