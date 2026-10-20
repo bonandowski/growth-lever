@@ -17,7 +17,11 @@
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="wrap"><main class="onboarding prerender"><p class="onb-kicker">Il secchio che perde</p><h1>Che secchio stai <em>riempiendo?</em></h1><p class="sub">Scegli il modello più vicino al tuo: parto da ordini di grandezza pubblici per quel tipo di business.</p></main></div></div>
+    <script>
+      // A shared link goes straight to the bucket: drop the onboarding preview.
+      if (location.search.length > 1) document.getElementById('root').innerHTML = '';
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

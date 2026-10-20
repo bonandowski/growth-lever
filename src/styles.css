@@ -200,3 +200,42 @@ h1 em { color: var(--accent); }
   .patch-hint { display: none; }
   .patch-btn { min-height: 64px; }
 }
+
+/* business type switch in the header */
+.top { gap: 16px; flex-wrap: wrap; }
+.type-switch { margin-left: auto; margin-right: 20px; color: var(--soft); font-size: 14px; }
+@media (max-width: 600px) { .type-switch { order: 3; margin: 0; width: 100%; text-align: left; } }
+
+/* onboarding */
+.onboarding { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 40px 0; max-width: 1100px; }
+.onb-kicker { font-style: italic; font-size: 18px; color: var(--soft); margin-bottom: 18px; }
+.onboarding h1 { font-size: clamp(40px, 6.4vw, 92px); }
+.onboarding .sub { max-width: 48ch; }
+.onb-cards { display: grid; gap: 12px; margin-top: 36px; grid-template-columns: 1fr; }
+@media (min-width: 700px) { .onb-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .onb-cards { grid-template-columns: repeat(3, 1fr); } }
+.onb-card { padding: 20px 18px; gap: 16px; }
+.onb-card:hover { background: #1f201e; }
+.onb-label { font-size: 19px; line-height: 1.2; }
+.onb-card .patch-hint { display: block; font-size: 13.5px; }
+.onb-icon { flex: 0 0 44px; width: 44px; height: 44px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.onb-icon .water { stroke: var(--water); stroke-width: 2.5; }
+.onb-note { margin-top: 26px; font-size: 14px; color: var(--soft); font-style: italic; }
+
+/* sources table */
+.sources-title { font-size: 16px; font-weight: 500; margin: 20px 0 8px; }
+.sources { border-collapse: collapse; font-size: 14px; width: 100%; max-width: 900px; }
+.sources th, .sources td { text-align: left; vertical-align: top; padding: 7px 12px 7px 0; border-top: 1px solid var(--line); }
+.sources th { font-weight: 500; white-space: nowrap; }
+.sources td { color: var(--soft); }
+.sources a { color: var(--soft); }
+.origin { font-style: italic; font-size: 12.5px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); }
+.origin.fonte { color: var(--water-light); border-color: var(--water); }
+.origin.derivato { color: var(--ink); }
+.sources-note { margin-top: 10px; font-size: 13px; color: var(--soft); font-style: italic; }
+@media (max-width: 600px) {
+  .sources, .sources tbody, .sources tr, .sources th, .sources td { display: block; }
+  .sources tr { border-top: 1px solid var(--line); padding: 8px 0; }
+  .sources th, .sources td { border: 0; padding: 2px 0; }
+}
+.onboarding.prerender { justify-content: flex-start; padding-top: 22vh; }

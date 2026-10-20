@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { equivalentPush, insight, leverImpacts, pushLever, simulate, type Lever } from './model';
-import { ASSUMPTIONS, LEVER_SUBJECT, refPhrase } from './copy';
+import { ASSUMPTIONS, LEVER_SUBJECT, PRESET_LABEL, UNIT_N, refPhrase } from './copy';
 import { eur } from './format';
-import { PRESETS } from './presets';
+import { PRESETS, SOURCES, type PresetKey } from './presets';
 import { readState, sanitize, writeState, type AppState } from './url';
 import { Bucket } from './components/Bucket';
 import { LeverButtons } from './components/LeverButtons';
 import { NumbersPanel } from './components/NumbersPanel';
+import { Onboarding } from './components/Onboarding';
 
 export default function App() {
   const [state, setState] = useState<AppState>(() => readState(window.location.search));
@@ -15,8 +16,14 @@ export default function App() {
   const { inputs, lever } = state;
 
   useEffect(() => {
-    window.history.replaceState(null, '', writeState(state));
+    window.history.replaceState(null, '', writeState(state) || window.location.pathname);
   }, [state]);
+
+  const pickType = (k: PresetKey) => {
+    setState({ onboarding: false, type: k, preset: k, inputs: { ...PRESETS[k] }, lever: null });
+    setPanel(false);
+    window.scrollTo(0, 0);
+  };
 
   const base = useMemo(() => simulate(inputs), [inputs]);
   const impacts = useMemo(() => leverImpacts(inputs), [inputs]);
@@ -61,19 +68,30 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  if (state.onboarding) {
+    return (
+      <div className="wrap">
+        <Onboarding onPick={pickType} />
+      </div>
+    );
+  }
+
   return (
     <div className="wrap">
       <header className="top">
         <span className="brand">Il secchio che perde</span>
+        <button type="button" className="link type-switch" onClick={() => setState((s) => ({ ...s, onboarding: true, lever: null }))}>
+          {PRESET_LABEL[state.type]} · cambia
+        </button>
         <button type="button" className="link" onClick={copyLink} aria-live="polite">
           {copied ? 'Link copiato' : 'Copia link'}
         </button>
       </header>
 
       <p className="banner">
-        <strong className="banner-long">Numeri di esempio inventati</strong>
+        <strong className="banner-long">Ordini di grandezza da report pubblici, non i tuoi numeri</strong>
         <span className="banner-long">: cambiali con i tuoi. Non salvo e non invio niente, il calcolo resta nel tuo browser: è solo a scopo dimostrativo.</span>
-        <span className="banner-short"><strong>Dati inventati</strong> · niente salvato · solo demo</span>
+        <span className="banner-short"><strong>Dati di settore, non i tuoi</strong> · niente salvato · demo</span>
       </p>
 
       <main className="main">
@@ -84,7 +102,7 @@ export default function App() {
           <p className="sub">Prima di aprire di più il rubinetto, guarda da dove perde. Premi una toppa qui sotto.</p>
         </section>
         <div className="scene">
-          <Bucket base={base} shown={shown} inputs={pushed} lever={lever} />
+          <Bucket base={base} shown={shown} inputs={pushed} lever={lever} unit={UNIT_N[state.type]} />
         </div>
         <section className="verdict" aria-live="polite">
           <p className="verdict-kicker">{lever ? 'Con questa toppa' : 'Con questi numeri'}</p>
@@ -108,15 +126,30 @@ export default function App() {
         </button>
         <div id="numbers" hidden={!panel}>
           <NumbersPanel
+            type={state.type}
             inputs={inputs}
             preset={state.preset}
-            onPreset={(k) => setState((s) => ({ ...s, preset: k, inputs: { ...PRESETS[k] } }))}
+            onPreset={(k) => setState((s) => ({ ...s, type: k, preset: k, inputs: { ...PRESETS[k] } }))}
             onChange={(p) => setState((s) => ({ ...s, preset: null, inputs: sanitize(p) }))}
           />
         </div>
         <details className="assumptions">
           <summary>Come ragiona il modello</summary>
           <ul>{ASSUMPTIONS.map((a) => <li key={a}>{a}</li>)}</ul>
+          <h2 className="sources-title">Da dove vengono i numeri: {PRESET_LABEL[state.type]}</h2>
+          <table className="sources">
+            <tbody>
+              {SOURCES[state.type].map((src) => (
+                <tr key={src.metric}>
+                  <th scope="row">{src.metric}</th>
+                  <td>{src.value}</td>
+                  <td><span className={`origin ${src.origin}`}>{src.origin}</span></td>
+                  <td>{src.url ? <a href={src.url} rel="noopener" target="_blank">{src.note}</a> : src.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="sources-note">Quasi tutte le fonti sono sintesi di report di società di analytics, pagamenti o consulenza: i valori variano molto tra fonti diverse.</p>
         </details>
       </div>
 

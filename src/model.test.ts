@@ -14,7 +14,7 @@ import {
 } from './model';
 import { PRESETS } from './presets';
 
-const base: Inputs = PRESETS.smb;
+const base: Inputs = PRESETS.b2bPlg;
 
 describe('survival', () => {
   it('starts at 1, drops to r1, then decays by churn', () => {
@@ -140,5 +140,17 @@ describe('insight', () => {
   it('flags acquisition that destroys value', () => {
     const i = insight({ ...base, CAC: 5000 });
     expect(i.kind).toBe('acquisitionHurts');
+  });
+});
+
+describe('business presets', () => {
+  it.each(Object.entries(PRESETS))('%s stays within bounds and produces revenue', (_, p) => {
+    const r = simulate(p);
+    expect(r.mrr24).toBeGreaterThan(0);
+    expect(p.act).toBeLessThanOrEqual(1);
+    expect(p.r1).toBeLessThanOrEqual(1);
+    expect(p.e).toBeLessThanOrEqual(0.1);
+    expect(p.ref).toBeLessThanOrEqual(0.1);
+    expect(Number.isFinite(r.value)).toBe(true);
   });
 });

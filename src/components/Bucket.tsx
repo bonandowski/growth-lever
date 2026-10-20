@@ -7,6 +7,7 @@ interface Props {
   shown: Result; // numbers the scene shows (after the selected lever, if any)
   inputs: Inputs; // inputs behind `shown`
   lever: Lever | null;
+  unit: string; // what one unit of acquisition is: signup, install, visite…
 }
 
 // Geometry of the bucket (viewBox units).
@@ -19,8 +20,9 @@ const DEEP = [18, 72, 116], LIGHT = [156, 207, 238];
 const blue = (t: number) => `rgb(${DEEP.map((a, i) => Math.round(a + (LIGHT[i] - a) * t)).join(',')})`;
 
 /** Stroke width for a monthly € flow, relative to MRR; compressed so small flows stay visible. */
+const MAX_FLOW = 40;
 const flowWidth = (flow: number, ref: number) =>
-  flow <= 0 || ref <= 0 ? 0 : 3 + 80 * Math.pow(flow / ref, 0.75);
+  flow <= 0 || ref <= 0 ? 0 : Math.min(MAX_FLOW, 3 + 80 * Math.pow(flow / ref, 0.75));
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -53,7 +55,7 @@ function useTween(target: number[], ms = 700): number[] {
   return value;
 }
 
-export function Bucket({ base, shown, inputs: q, lever }: Props) {
+export function Bucket({ base, shown, inputs: q, lever, unit }: Props) {
   const last = shown.series[shown.series.length - 1];
   const ref = base.mrr24 || 1;
   const cap = Math.max(base.mrr24, shown.mrr24, 1) * 1.3;
@@ -81,8 +83,9 @@ export function Bucket({ base, shown, inputs: q, lever }: Props) {
 
   // Flows (€ per month), drawn as stream widths.
   const users = last.paidUsers + last.referredUsers;
-  const wUsers = flowWidth(users * q.ARPA, ref);
   const wPaying = flowWidth(last.newCustomers * q.ARPA, ref);
+  // users entering the funnel: always at least as wide as what comes out of it
+  const wUsers = users > 0 ? Math.max(wPaying + 6, flowWidth(users * q.ARPA, ref)) : 0;
   const wJet = flowWidth(last.lostFirstMonth * q.ARPA, ref);
   const wDrip = Math.max(3, flowWidth((last.lostLater * q.ARPA) / 3, ref));
   const wUpsell = Math.max(3, flowWidth(last.mrrExpansion * q.e * 3, ref));
@@ -101,7 +104,7 @@ export function Bucket({ base, shown, inputs: q, lever }: Props) {
   );
 
   const summary =
-    `Secchio a 24 mesi: ${num(users)} utenti al mese entrano, ${pct(q.act)} di activation, ` +
+    `Secchio a 24 mesi: ${num(users)} ${unit} al mese entrano, ${pct(q.act, 1)} di activation, ` +
     `${pct(1 - q.r1)} churn M1, poi churn mensile ${pct(q.c, 1)}. MRR al mese 24: ${eur(shown.mrr24)}.`;
 
   return (
@@ -160,9 +163,9 @@ export function Bucket({ base, shown, inputs: q, lever }: Props) {
       <path className="ground" d="M0,682 H780" />
       {before !== null && <path className="was" d={`M${xl(before) + 6},${before} H${xr(before) - 6}`} />}
 
-      {label(20, 30, 'Acquisizione', `${num(q.N + (q.boost ?? 0))}/mese`, 'start', 'N')}
-      {label(160, 160, 'CAC', `€${num(q.CAC)}`, 'start', 'CAC')}
-      {label(20, 230, 'Activation', pct(q.act), 'start', 'act')}
+      {label(20, 30, 'Acquisizione', `${num(q.N + (q.boost ?? 0))} ${unit}/mese`, 'start', 'N')}
+      {label(160, 160, 'CAC', q.CAC < 10 ? `€${q.CAC.toLocaleString('it-IT', { maximumFractionDigits: 2 })}` : `€${num(q.CAC)}`, 'start', 'CAC')}
+      {label(20, 230, 'Activation', pct(q.act, q.act < 0.1 ? 1 : 0), 'start', 'act')}
       {label(20, Math.min(top + 8, 470), 'MRR mese 24', eur(shown.mrr24), 'start')}
       {label(20, 540, 'Churn M1', pct(1 - q.r1), 'start', 'r1')}
       {label(440, 716, 'Churn mensile', pct(q.c, 1), 'middle', 'c')}

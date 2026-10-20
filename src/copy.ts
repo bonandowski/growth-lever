@@ -48,14 +48,41 @@ export function refPhrase(ref: Lever, x: number): string {
 }
 
 export const PRESET_LABEL: Record<PresetKey, string> = {
-  smb: 'Software per piccole aziende',
-  b2b: 'B2B, pochi clienti grandi',
-  welfare: 'B2B2C welfare / benefit',
+  b2bPlg: 'SaaS B2B product-led',
+  b2bSales: 'SaaS B2B sales-led',
+  b2cApp: 'App B2C in abbonamento',
+  ecommerce: 'E-commerce D2C',
+  news: 'News con abbonamento',
+};
+
+export const PRESET_TAGLINE: Record<PresetKey, string> = {
+  b2bPlg: 'trial o freemium, self-serve',
+  b2bSales: 'pochi clienti grandi, team sales',
+  b2cApp: 'fitness, learning, produttività',
+  ecommerce: 'prodotti che si ricomprano',
+  news: 'paywall e abbonamento digitale',
+};
+
+/** What one unit of acquisition is, per business type. */
+export const UNIT_N: Record<PresetKey, string> = {
+  b2bPlg: 'signup',
+  b2bSales: 'opportunità',
+  b2cApp: 'install',
+  ecommerce: 'visite',
+  news: 'visite',
+};
+
+export const UNIT_N_ONE: Record<PresetKey, string> = {
+  b2bPlg: 'signup',
+  b2bSales: 'opportunità',
+  b2cApp: 'install',
+  ecommerce: 'visita',
+  news: 'visita',
 };
 
 export const FIELDS = [
-  { key: 'N', label: 'Acquisizione: nuovi utenti al mese', unit: 'utenti', min: 0, max: 100000, step: 10, scale: 1 },
-  { key: 'CAC', label: 'CAC: costo per utente', unit: '€', min: 0, max: 100000, step: 10, scale: 1 },
+  { key: 'N', label: 'Acquisizione', unit: 'al mese', min: 0, max: 10000000, step: 10, scale: 1 },
+  { key: 'CAC', label: 'CAC', unit: '€', min: 0, max: 100000, step: 10, scale: 1 },
   { key: 'act', label: 'Activation: utenti che pagano', unit: '%', min: 0, max: 100, step: 1, scale: 100 },
   { key: 'ARPA', label: 'ARPA: ricavo mensile per cliente', unit: '€', min: 0, max: 100000, step: 1, scale: 1 },
   { key: 'r1', label: 'Retention M1: attivi dopo il mese 1', unit: '%', min: 0, max: 100, step: 1, scale: 100 },
@@ -66,11 +93,11 @@ export const FIELDS = [
 ] as const;
 
 export const ASSUMPTIONS = [
-  'Ogni mese entrano utenti acquisiti a pagamento (CAC costante) e utenti da referral (CAC zero).',
+  'Ogni mese entrano utenti acquisiti (CAC costante, già mediato con il traffico organico dove indicato) e utenti da referral (CAC zero).',
   'Activation: solo chi arriva all’aha moment paga. Gli altri escono subito.',
   'Con +10% di acquisizione, gli utenti in più hanno metà dell’activation attuale: spesso sono meno interessati.',
   'Dopo la retention M1 il churn è costante. Nessuna stagionalità, nessun limite di mercato, prezzo e margine fissi.',
   'L’expansion fa crescere l’ARPA dei clienti attivi, ogni mese della stessa percentuale.',
   'Confronto le leve sul valore creato: gross margin meno CAC nei 24 mesi, più il margine che i clienti ancora attivi daranno nei 36 mesi dopo. Niente attualizzazione.',
-  'È un modello per ragionare, non una previsione.',
+  'I numeri di partenza sono ordini di grandezza da report pubblici, arrotondati: non sono i tuoi e non sono una previsione.',
 ];

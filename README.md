@@ -4,7 +4,9 @@ Un simulatore delle leve di crescita per prodotti in abbonamento (B2B e SMB). Ri
 
 Il prodotto è un secchio. Entrano utenti (acquisizione, a un CAC), solo una parte arriva all'aha moment e paga (activation), i clienti escono (churn M1 e churn mensile), quelli che restano crescono (expansion) e portano altri utenti gratis (referral). Gli otto pulsanti sotto la scena applicano un +10% a una leva alla volta e mostrano quanto vale, anche rispetto a una riduzione del CAC.
 
-Tutti i numeri di esempio sono inventati. Nessun backend, nessun cookie, nessun dato salvato: il calcolo resta nel browser. L'unica cosa esterna è Vercel Web Analytics (visite aggregate, senza cookie e senza dati personali).
+Si parte da una schermata che chiede il tipo di business: SaaS B2B product-led, SaaS B2B sales-led, app B2C in abbonamento, e-commerce D2C, news con abbonamento. Ogni tipo carica ordini di grandezza presi da report pubblici, arrotondati e con fonte. Ogni numero è segnato come *fonte*, *derivato* (calcolato da un benchmark), *stima* (nessuna fonte affidabile) o *esempio* (dipende dalla dimensione dell'azienda). La tabella con i link è in pagina, sotto "Come ragiona il modello", ed è definita in `src/presets.ts`. Un link con `?p=<tipo>` salta l'onboarding.
+
+Nessun backend, nessun cookie, nessun dato salvato: il calcolo resta nel browser. L'unica cosa esterna è Vercel Web Analytics (visite aggregate, senza cookie e senza dati personali).
 
 Ispirato a *Growth Levers and How to Find Them* di Matt Lerner.
 
@@ -21,10 +23,10 @@ Struttura:
 
 - `src/model.ts`: modello puro (simulazione per coorti, leve, bisezione, frase insight). Nessun DOM, nessun React.
 - `src/model.test.ts`, `src/url.test.ts`: test.
-- `src/presets.ts`: i 3 esempi inventati.
+- `src/presets.ts`: i 5 tipi di business, con numeri di partenza e fonti.
 - `src/copy.ts`: tutti i testi (solo italiano).
-- `src/url.ts`: lo stato vive nei parametri dell'URL (`?p=smb&leva=c`, oppure i numeri uno per uno).
-- `src/components/`: `Bucket` (la scena SVG), `LeverButtons` + `LeverIcon`, `NumbersPanel`.
+- `src/url.ts`: lo stato vive nei parametri dell'URL (`?p=b2bPlg&leva=c`, più i numeri uno per uno se modificati). Senza parametri si apre l'onboarding.
+- `src/components/`: `Onboarding`, `Bucket` (la scena SVG), `LeverButtons` + `LeverIcon`, `NumbersPanel`.
 - `public/fonts/`: Fraunces (licenza OFL), servito dal sito stesso.
 
 ## Il modello in breve
@@ -62,7 +64,9 @@ vercel --prod   # pubblica in produzione
 **Verifica dopo il deploy**
 
 - la pagina si apre con il secchio animato e la frase in alto;
-- premi "Churn −10%": la frase cambia, compare la toppa e l'URL diventa `?p=smb&leva=c`;
+- dall'onboarding scegli un tipo: si apre il secchio con i numeri di quel tipo;
+- premi "Churn −10%": la frase cambia, compare la toppa e l'URL diventa `?p=<tipo>&leva=c`;
+- "cambia" in alto riporta all'onboarding;
 - "Copia link", apri il link in un'altra finestra: stesso stato;
 - "Usa i miei numeri": cambia il CAC e controlla che frase e secchio si aggiornino;
 - Lighthouse (Chrome DevTools, mobile) su performance e accessibilità.
