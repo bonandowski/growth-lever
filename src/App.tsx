@@ -13,7 +13,6 @@ import { Paywall, markPaywallSeen, paywallSeen } from './components/Paywall';
 export default function App() {
   const [state, setState] = useState<AppState>(() => readState(window.location.search));
   const [panel, setPanel] = useState(false);
-  const [copied, setCopied] = useState(false);
   // the joke paywall shows once, on the first lever click; the browser only remembers that it was seen
   const [paywall, setPaywall] = useState<'pending' | 'open' | 'done'>(() => (paywallSeen() ? 'done' : 'pending'));
   const closePaywall = useCallback(() => setPaywall('done'), []);
@@ -61,16 +60,6 @@ export default function App() {
     }
   }, [lever, impacts, inputs, base, shown]);
 
-  const copyLink = async () => {
-    const url = window.location.href;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      window.prompt('Copia questo link:', url);
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   if (state.onboarding) {
     return (
@@ -87,15 +76,11 @@ export default function App() {
         <button type="button" className="link type-switch" onClick={() => setState((s) => ({ ...s, onboarding: true, lever: null }))}>
           {PRESET_LABEL[state.type]} · cambia
         </button>
-        <button type="button" className="link" onClick={copyLink} aria-live="polite">
-          {copied ? 'Link copiato' : 'Copia link'}
-        </button>
       </header>
 
       <p className="banner">
         <strong className="banner-long">Ordini di grandezza da report pubblici, non i tuoi numeri</strong>
         <span className="banner-long">: cambiali con i tuoi. I tuoi numeri non vengono salvati né inviati: il calcolo resta nel tuo browser. È solo a scopo dimostrativo.</span>
-        <span className="banner-short"><strong>Dati di settore, non i tuoi</strong> · numeri non salvati · demo</span>
       </p>
 
       <main className="main">
@@ -103,7 +88,7 @@ export default function App() {
           <h1>
             Stai versando soldi in un <em>secchio bucato.</em>
           </h1>
-          <p className="sub">Prima di aprire di più il rubinetto, guarda da dove perde. Premi una toppa qui sotto.</p>
+          <p className="sub">Guarda da dove perde, poi premi una toppa.</p>
         </section>
         <div className="scene">
           <Bucket base={base} shown={shown} inputs={pushed} lever={lever} unit={UNIT_N[state.type]} />
@@ -134,6 +119,14 @@ export default function App() {
         }}
       />
       {paywall === 'open' && <Paywall onClose={closePaywall} />}
+
+      {/* on small screens, type and data notice live here instead of above the bucket */}
+      <div className="mobile-meta">
+        <button type="button" className="link" onClick={() => setState((s) => ({ ...s, onboarding: true, lever: null }))}>
+          {PRESET_LABEL[state.type]} · cambia attività
+        </button>
+        <p>Dati di settore da report pubblici, non i tuoi. I tuoi numeri non vengono salvati né inviati. Solo demo.</p>
+      </div>
 
       <div className="extras">
         <button type="button" className="link" aria-expanded={panel} aria-controls="numbers" onClick={() => setPanel((v) => !v)}>

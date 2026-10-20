@@ -67,6 +67,6 @@ vercel --prod   # pubblica in produzione
 - dall'onboarding scegli un tipo: si apre il secchio con i numeri di quel tipo;
 - premi "Churn −10%": la frase cambia, compare la toppa e l'URL diventa `?p=<tipo>&leva=c`;
 - "cambia" in alto riporta all'onboarding;
-- "Copia link", apri il link in un'altra finestra: stesso stato;
+- copia l'URL dalla barra del browser e aprilo in un'altra finestra: stesso stato;
 - "Usa i miei numeri": cambia il CAC e controlla che frase e secchio si aggiornino;
 - Lighthouse (Chrome DevTools, mobile) su performance e accessibilità.
