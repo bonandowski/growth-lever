@@ -101,8 +101,8 @@ export function Bucket({ base, shown, inputs: q, lever }: Props) {
   );
 
   const summary =
-    `Secchio a 24 mesi: ${num(users)} utenti al mese entrano, ${pct(q.act)} arriva all’aha moment e paga, ` +
-    `${pct(1 - q.r1)} se ne va dopo il primo mese e poi ${pct(q.c, 1)} al mese. MRR al mese 24: ${eur(shown.mrr24)}.`;
+    `Secchio a 24 mesi: ${num(users)} utenti al mese entrano, ${pct(q.act)} di activation, ` +
+    `${pct(1 - q.r1)} churn M1, poi churn mensile ${pct(q.c, 1)}. MRR al mese 24: ${eur(shown.mrr24)}.`;
 
   return (
     <svg className="bucket" viewBox="0 0 780 760" role="img" aria-label={summary}>
@@ -162,13 +162,13 @@ export function Bucket({ base, shown, inputs: q, lever }: Props) {
 
       {label(20, 30, 'Acquisizione', `${num(q.N + (q.boost ?? 0))}/mese`, 'start', 'N')}
       {label(160, 160, 'CAC', `€${num(q.CAC)}`, 'start', 'CAC')}
-      {label(20, 230, 'Aha moment', pct(q.act), 'start', 'act')}
-      {label(20, Math.min(top + 8, 470), 'MRR al mese 24', eur(shown.mrr24), 'start')}
-      {label(20, 540, 'Buco grande', `−${pct(1 - q.r1)}`, 'start', 'r1')}
-      {label(440, 716, 'Churn', `${pct(q.c, 1)}/mese`, 'middle', 'c')}
-      {label(604, 150, 'Upsell', `+${pct(q.e, 1)}/mese`, 'middle', 'e')}
-      {label(770, 560, 'Passaparola', `${num(last.referredUsers)}/mese`, 'end', 'ref')}
-      {lever === 'ARPA' && label(330, 250, '', `€${num(q.ARPA)}`, 'start', 'ARPA')}
+      {label(20, 230, 'Activation', pct(q.act), 'start', 'act')}
+      {label(20, Math.min(top + 8, 470), 'MRR mese 24', eur(shown.mrr24), 'start')}
+      {label(20, 540, 'Churn M1', pct(1 - q.r1), 'start', 'r1')}
+      {label(440, 716, 'Churn mensile', pct(q.c, 1), 'middle', 'c')}
+      {label(604, 150, 'Expansion', `+${pct(q.e, 1)}/mese`, 'middle', 'e')}
+      {label(770, 560, 'Referral', `${num(last.referredUsers)}/mese`, 'end', 'ref')}
+      {lever === 'ARPA' && label(340, 236, 'ARPA', `€${num(q.ARPA)}`, 'start', 'ARPA')}
     </svg>
   );
 }

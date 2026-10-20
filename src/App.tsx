@@ -8,8 +8,6 @@ import { Bucket } from './components/Bucket';
 import { LeverButtons } from './components/LeverButtons';
 import { NumbersPanel } from './components/NumbersPanel';
 
-const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
-
 export default function App() {
   const [state, setState] = useState<AppState>(() => readState(window.location.search));
   const [panel, setPanel] = useState(false);
@@ -31,22 +29,22 @@ export default function App() {
       const d = impact.delta;
       const mrr = `L’MRR al mese 24 passa da ${eur(base.mrr24)} a ${eur(shown.mrr24)}.`;
       if (impact.capped && d <= 0) return { title: `${LEVER_SUBJECT[lever]} qui non si può:`, accent: 'è già al massimo.', sub: '' };
-      if (d < 0) return { title: `${LEVER_SUBJECT[lever]} qui`, accent: `toglie ${eur(-d)} di valore.`, sub: 'Gli utenti in più costano e restano poco. Prima ripara il secchio.' };
+      if (d < 0) return { title: `${LEVER_SUBJECT[lever]} qui`, accent: `toglie ${eur(-d)} di valore.`, sub: 'Gli utenti in più costano e hanno activation bassa. Prima lavora su retention e activation.' };
       if (d === 0) return { title: `${LEVER_SUBJECT[lever]} qui`, accent: 'non sposta niente.', sub: '' };
       const ref: Lever = lever === 'CAC' ? (impacts.find((i) => i.lever !== 'CAC' && i.delta > 0)?.lever ?? 'N') : 'CAC';
       const x = equivalentPush(inputs, ref, d);
-      const accentText = x === null ? `più di qualsiasi ${ref === 'CAC' ? 'sconto sul CAC' : 'spinta sola'}.` : `${refPhrase(ref, x)}.`;
+      const accentText = x === null ? `più di qualsiasi ${ref === 'CAC' ? 'riduzione del CAC' : 'spinta su una leva sola'}.` : `${refPhrase(ref, x)}.`;
       return { title: `${LEVER_SUBJECT[lever]} vale quanto`, accent: accentText, sub: `+${eur(d)} di valore creato. ${mrr}` };
     }
     const i = insight(inputs);
-    const value = `Oggi il secchio crea ${eur(base.value)} di valore. Prova un intervento qui sotto.`;
+    const value = `È la leva più forte con questi numeri. Oggi il secchio crea ${eur(base.value)} di valore: prova le altre qui sotto.`;
     switch (i.kind) {
       case 'equivalent':
-        return { title: `Qui conviene ${lower(LEVER_SUBJECT[i.lever])}: vale quanto`, accent: `${refPhrase(i.ref, i.x)}.`, sub: value };
+        return { title: `${LEVER_SUBJECT[i.lever]} vale quanto`, accent: `${refPhrase(i.ref, i.x)}.`, sub: value };
       case 'beyond':
-        return { title: `Qui conviene ${lower(LEVER_SUBJECT[i.lever])}:`, accent: 'vale più di qualsiasi sconto sul CAC.', sub: value };
+        return { title: LEVER_SUBJECT[i.lever], accent: 'vale più di qualsiasi riduzione del CAC.', sub: value };
       case 'acquisitionHurts':
-        return { title: 'Comprare più utenti qui', accent: 'distrugge valore.', sub: `Il secchio perde troppo. Prima: ${lower(LEVER_SUBJECT[i.lever])}.` };
+        return { title: 'Qui più acquisizione', accent: 'distrugge valore.', sub: `Il secchio perde troppo. Prima: ${LEVER_SUBJECT[i.lever]}.` };
       default:
         return { title: 'Il secchio è vuoto:', accent: 'senza utenti non c’è niente da spingere.', sub: 'Inserisci i tuoi numeri qui sotto.' };
     }
