@@ -246,26 +246,30 @@ h1 em { color: var(--accent); }
   inset: 0;
   z-index: 50;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  background: linear-gradient(to bottom, rgba(17, 18, 18, 0) 0%, rgba(17, 18, 18, 0.75) 35%, rgba(17, 18, 18, 0.97) 70%);
-  backdrop-filter: blur(2px);
+  padding: 16px;
+  background: rgba(10, 10, 10, 0.78);
+  backdrop-filter: blur(4px);
   animation: fade-in 0.3s ease-out;
 }
 .paywall {
   width: min(640px, 100%);
   background: #f6f1e7;
   color: #1c1a17;
-  border-radius: 18px 18px 0 0;
-  padding: 26px clamp(20px, 5vw, 44px) 30px;
-  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.45);
-  border-top: 5px solid var(--accent);
-  animation: slide-up 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  border-radius: 18px;
+  padding: 28px clamp(20px, 5vw, 44px) 28px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+  border-top: 6px solid var(--accent);
+  animation: pop-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
 .paywall-meter { font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #8a5a2b; font-weight: 600; }
 .paywall h2 { margin-top: 8px; font-weight: 400; font-size: clamp(28px, 4.4vw, 40px); line-height: 1.05; letter-spacing: -0.02em; font-variation-settings: 'opsz' 144; }
 .paywall-price { margin-top: 10px; font-size: 16px; color: #6d675d; }
 .paywall-price span { color: #1c1a17; }
+.paywall-price a { color: #b04e00; font-style: italic; text-underline-offset: 3px; }
 .paywall-text { margin-top: 16px; font-size: 17px; line-height: 1.45; border-top: 1px solid #ddd3c2; padding-top: 16px; }
 .paywall-text em { color: #b04e00; }
 .paywall-btn {
@@ -282,4 +286,4 @@ h1 em { color: var(--accent); }
 .paywall-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .paywall-fine { margin-top: 10px; text-align: center; font-size: 12.5px; color: #8b8478; font-style: italic; }
 @keyframes fade-in { from { opacity: 0; } }
-@keyframes slide-up { from { transform: translateY(100%); } }
+@keyframes pop-in { from { transform: translateY(24px) scale(0.94); opacity: 0; } }

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 
 // A fake news-site paywall, shown once on the first lever click. It's a joke: it never blocks.
 export function Paywall({ onClose }: { onClose: () => void }) {
+  const dialog = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -10,10 +11,13 @@ export function Paywall({ onClose }: { onClose: () => void }) {
     document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'Tab') {
-        // the dialog has one real action: keep focus on it
+      if (e.key === 'Tab' && dialog.current) {
+        // keep focus inside the dialog
+        const items = Array.from(dialog.current.querySelectorAll<HTMLElement>('a, button'));
+        const i = items.indexOf(document.activeElement as HTMLElement);
+        const next = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : (i + 1) % items.length;
         e.preventDefault();
-        button.current?.focus();
+        items[next]?.focus();
       }
     };
     window.addEventListener('keydown', onKey);
@@ -27,6 +31,7 @@ export function Paywall({ onClose }: { onClose: () => void }) {
   return (
     <div className="paywall-backdrop" onClick={onClose}>
       <div
+        ref={dialog}
         className="paywall"
         role="dialog"
         aria-modal="true"
@@ -37,7 +42,13 @@ export function Paywall({ onClose }: { onClose: () => void }) {
         <p className="paywall-meter">Hai usato 1 leva gratuita su 1 questo mese</p>
         <h2 id="paywall-title">Per continuare, abbonati.</h2>
         <p className="paywall-price">
-          <s aria-hidden="true">€4,99/mese</s> <span>Prezzo attuale: 1 collabo con me.</span>
+          <s aria-hidden="true">€4,99/mese</s> <span>
+            Prezzo attuale: 1{' '}
+            <a href="https://www.linkedin.com/in/leonardo-bonalumi/" target="_blank" rel="noopener">
+              collabo con me
+            </a>
+            .
+          </span>
         </p>
         <p id="paywall-text" className="paywall-text">
           Deformazione professionale: ormai tutto è dietro un paywall o una pubblicità. Ovviamente scherzo, puoi
