@@ -34,7 +34,7 @@ export function Onboarding({ onPick }: { onPick: (k: PresetKey) => void }) {
           </button>
         ))}
       </div>
-      <p className="onb-note">Niente viene salvato o inviato. Potrai sempre mettere i tuoi numeri.</p>
+      <p className="onb-note">I tuoi numeri non vengono salvati né inviati. Potrai sempre mettere i tuoi.</p>
     </main>
   );
 }

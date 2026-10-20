@@ -6,7 +6,7 @@ Il prodotto è un secchio. Entrano utenti (acquisizione, a un CAC), solo una par
 
 Si parte da una schermata che chiede il tipo di business: SaaS B2B product-led, SaaS B2B sales-led, app B2C in abbonamento, e-commerce D2C, news con abbonamento. Ogni tipo carica ordini di grandezza presi da report pubblici, arrotondati e con fonte. Ogni numero è segnato come *fonte*, *derivato* (calcolato da un benchmark), *stima* (nessuna fonte affidabile) o *esempio* (dipende dalla dimensione dell'azienda). La tabella con i link è in pagina, sotto "Come ragiona il modello", ed è definita in `src/presets.ts`. Un link con `?p=<tipo>` salta l'onboarding.
 
-Nessun backend, nessun cookie, nessun dato salvato: il calcolo resta nel browser. L'unica cosa esterna è Vercel Web Analytics (visite aggregate, senza cookie e senza dati personali).
+Nessun backend, nessun cookie, nessun numero salvato o inviato: il calcolo resta nel browser. L'unica cosa che il browser ricorda (localStorage) è che hai già visto il finto paywall, per non mostrarlo di nuovo. L'unica cosa esterna è Vercel Web Analytics (visite aggregate, senza cookie e senza dati personali).
 
 Ispirato a *Growth Levers and How to Find Them* di Matt Lerner.
 

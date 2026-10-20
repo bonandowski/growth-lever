@@ -8,14 +8,14 @@ import { Bucket } from './components/Bucket';
 import { LeverButtons } from './components/LeverButtons';
 import { NumbersPanel } from './components/NumbersPanel';
 import { Onboarding } from './components/Onboarding';
-import { Paywall } from './components/Paywall';
+import { Paywall, markPaywallSeen, paywallSeen } from './components/Paywall';
 
 export default function App() {
   const [state, setState] = useState<AppState>(() => readState(window.location.search));
   const [panel, setPanel] = useState(false);
   const [copied, setCopied] = useState(false);
-  // the joke paywall shows once per visit, on the first lever click; nothing is stored
-  const [paywall, setPaywall] = useState<'pending' | 'open' | 'done'>('pending');
+  // the joke paywall shows once, on the first lever click; the browser only remembers that it was seen
+  const [paywall, setPaywall] = useState<'pending' | 'open' | 'done'>(() => (paywallSeen() ? 'done' : 'pending'));
   const closePaywall = useCallback(() => setPaywall('done'), []);
   const { inputs, lever } = state;
 
@@ -94,8 +94,8 @@ export default function App() {
 
       <p className="banner">
         <strong className="banner-long">Ordini di grandezza da report pubblici, non i tuoi numeri</strong>
-        <span className="banner-long">: cambiali con i tuoi. Non salvo e non invio niente, il calcolo resta nel tuo browser: è solo a scopo dimostrativo.</span>
-        <span className="banner-short"><strong>Dati di settore, non i tuoi</strong> · niente salvato · demo</span>
+        <span className="banner-long">: cambiali con i tuoi. I tuoi numeri non vengono salvati né inviati: il calcolo resta nel tuo browser. È solo a scopo dimostrativo.</span>
+        <span className="banner-short"><strong>Dati di settore, non i tuoi</strong> · numeri non salvati · demo</span>
       </p>
 
       <main className="main">
@@ -127,7 +127,10 @@ export default function App() {
         selected={lever}
         onSelect={(l) => {
           setState((s) => ({ ...s, lever: l }));
-          if (l && paywall === 'pending') setPaywall('open');
+          if (l && paywall === 'pending') {
+            setPaywall('open');
+            markPaywallSeen();
+          }
         }}
       />
       {paywall === 'open' && <Paywall onClose={closePaywall} />}

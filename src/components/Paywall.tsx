@@ -1,5 +1,24 @@
 import { useEffect, useRef } from 'react';
 
+const SEEN_KEY = 'secchio:paywall-visto';
+
+// Storage can be missing or blocked (private mode, previews): then the paywall just shows once per visit.
+export function paywallSeen(): boolean {
+  try {
+    return window.localStorage.getItem(SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markPaywallSeen() {
+  try {
+    window.localStorage.setItem(SEEN_KEY, '1');
+  } catch {
+    // nothing to do
+  }
+}
+
 // A fake news-site paywall, shown once on the first lever click. It's a joke: it never blocks.
 export function Paywall({ onClose }: { onClose: () => void }) {
   const dialog = useRef<HTMLDivElement>(null);

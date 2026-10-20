@@ -99,5 +99,6 @@ export const ASSUMPTIONS = [
   'Dopo la retention M1 il churn è costante. Nessuna stagionalità, nessun limite di mercato, prezzo e margine fissi.',
   'L’expansion fa crescere l’ARPA dei clienti attivi, ogni mese della stessa percentuale.',
   'Confronto le leve sul valore creato: gross margin meno CAC nei 24 mesi, più il margine che i clienti ancora attivi daranno nei 36 mesi dopo. Niente attualizzazione.',
+  'Il browser ricorda solo una cosa: che hai già visto il finto paywall (localStorage, nessun dato). I tuoi numeri non vengono salvati.',
   'I numeri di partenza sono ordini di grandezza da report pubblici, arrotondati: non sono i tuoi e non sono una previsione.',
 ];
