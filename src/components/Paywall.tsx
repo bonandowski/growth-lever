@@ -36,8 +36,8 @@ export function Paywall({ onClose }: { onClose: () => void }) {
       >
         <p className="paywall-meter">Hai usato 1 leva gratuita su 1 questo mese</p>
         <h2 id="paywall-title">Per continuare, abbonati.</h2>
-        <p className="paywall-price" aria-hidden="true">
-          <s>€4,99/mese</s> <span>primo mese a €0,99</span>
+        <p className="paywall-price">
+          <s aria-hidden="true">€4,99/mese</s> <span>Prezzo attuale: 1 collabo con me.</span>
         </p>
         <p id="paywall-text" className="paywall-text">
           Deformazione professionale: ormai tutto è dietro un paywall o una pubblicità. Ovviamente scherzo, puoi
