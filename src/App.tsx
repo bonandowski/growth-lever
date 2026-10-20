@@ -71,25 +71,33 @@ export default function App() {
       </header>
 
       <p className="banner">
-        <strong>Numeri di esempio inventati:</strong> cambiali con i tuoi. Non salvo e non invio niente, il calcolo
-        resta nel tuo browser: è solo a scopo dimostrativo.
+        <strong className="banner-long">Numeri di esempio inventati</strong>
+        <span className="banner-long">: cambiali con i tuoi. Non salvo e non invio niente, il calcolo resta nel tuo browser: è solo a scopo dimostrativo.</span>
+        <span className="banner-short"><strong>Dati inventati</strong> · niente salvato · solo demo</span>
       </p>
 
       <main className="main">
-        <section className="copy" aria-live="polite">
+        <section className="hero">
           <h1>
-            {title} <em>{accent}</em>
+            Stai versando soldi in un <em>secchio bucato.</em>
           </h1>
-          {sub && <p className="sub">{sub}</p>}
-          <dl className="kpis">
-            <div><dt>MRR al mese 12</dt><dd>{eur(shown.mrr12)}</dd></div>
-            <div><dt>MRR al mese 24</dt><dd>{eur(shown.mrr24)}</dd></div>
-            <div><dt>Payback CAC</dt><dd>{shown.payback === null ? 'oltre 24 mesi' : `${shown.payback} mesi`}</dd></div>
-          </dl>
+          <p className="sub">Prima di aprire di più il rubinetto, guarda da dove perde. Premi una toppa qui sotto.</p>
         </section>
         <div className="scene">
           <Bucket base={base} shown={shown} inputs={pushed} lever={lever} />
         </div>
+        <section className="verdict" aria-live="polite">
+          <p className="verdict-kicker">{lever ? 'Con questa toppa' : 'Con questi numeri'}</p>
+          <p className="verdict-text">
+            {title} <em>{accent}</em>
+          </p>
+          {sub && <p className="verdict-sub">{sub}</p>}
+          <dl className="kpis">
+            <div><dt>MRR mese 12</dt><dd>{eur(shown.mrr12)}</dd></div>
+            <div><dt>MRR mese 24</dt><dd>{eur(shown.mrr24)}</dd></div>
+            <div><dt>Payback CAC</dt><dd>{shown.payback === null ? 'oltre 24 mesi' : `${shown.payback} mesi`}</dd></div>
+          </dl>
+        </section>
       </main>
 
       <LeverButtons impacts={impacts} selected={lever} onSelect={(l) => setState((s) => ({ ...s, lever: l }))} />
