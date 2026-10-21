@@ -61,9 +61,27 @@ h1 {
 h1 em { color: var(--accent); }
 .sub { margin-top: 16px; font-size: 18px; color: var(--soft); max-width: 34ch; line-height: 1.45; }
 
-.verdict { margin-top: 32px; padding: 18px 0 0; border-top: 1px solid var(--line); }
+.verdict {
+  position: relative;
+  margin-top: 28px;
+  padding: 18px 20px 18px 22px;
+  background: var(--card);
+  border-radius: 16px;
+  border-left: 3px solid var(--accent);
+}
+/* stitched edge, like the patch buttons */
+.verdict::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1.5px dashed var(--line);
+  border-radius: 11px;
+  pointer-events: none;
+}
+.verdict > * { position: relative; }
+.verdict .kpis { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
 .verdict-kicker { font-size: 13px; font-style: italic; color: var(--soft); }
-.verdict-text { margin-top: 4px; font-size: clamp(22px, 2.2vw, 30px); line-height: 1.2; letter-spacing: -0.01em; font-variation-settings: 'opsz' 72, 'SOFT' 100; }
+.verdict-text { margin-top: 4px; font-size: clamp(21px, 1.9vw, 27px); line-height: 1.2; letter-spacing: -0.01em; font-variation-settings: 'opsz' 72, 'SOFT' 100; }
 .verdict-text em { color: var(--accent); }
 .verdict-sub { margin-top: 8px; font-size: 15px; color: var(--soft); max-width: 44ch; }
 
@@ -72,7 +90,8 @@ h1 em { color: var(--accent); }
   .main { padding-top: 10px; }
   h1 { font-size: 30px; }
   .sub { font-size: 16px; margin-top: 8px; }
-  .verdict { margin-top: 0; padding-top: 14px; }
+  .verdict { margin-top: 8px; padding: 16px 16px 16px 18px; }
+  .verdict .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
   .levers { padding-bottom: 12px; }
   .verdict-text { font-size: 21px; }
   .verdict-sub { font-size: 14px; }
@@ -311,7 +330,7 @@ h1 em { color: var(--accent); }
   .hero { padding-top: 0; }
   .hero h1 { font-size: clamp(36px, 3.6vw, 56px); }
   .scene .bucket { max-height: max(420px, calc(100vh - 250px)); width: auto; max-width: 100%; margin: 0 auto; }
-  .verdict { margin-top: 24px; }
+  .verdict { margin-top: 22px; }
   .levers { padding-top: 4px; }
   .patch-btn { padding: 10px 14px; }
 }
