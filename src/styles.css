@@ -33,13 +33,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .brand { font-style: italic; font-size: 20px; }
 .link { justify-self: start; background: none; border: 0; padding: 0; border-bottom: 1px solid currentColor; font-size: 15px; }
 
-.banner { margin-top: 18px; font-size: 14px; color: var(--soft); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
 .mobile-meta { display: none; }
 @media (max-width: 600px) {
-  .banner, .type-switch { display: none; }
+  .data-note, .type-switch { display: none; }
   .mobile-meta { display: grid; gap: 8px; padding: 0 0 20px; font-size: 13.5px; color: var(--soft); }
 }
-.banner strong { color: var(--ink); font-weight: 500; }
+.data-note { margin-top: 14px; font-size: 13px; color: var(--soft); max-width: 46ch; }
+.data-note strong { color: var(--ink); font-weight: 500; }
 
 .main { display: grid; gap: 8px; padding: 24px 0 8px; grid-template-areas: 'hero' 'scene' 'levers' 'verdict'; }
 .levers-area { grid-area: levers; }
@@ -303,3 +303,15 @@ h1 em { color: var(--accent); }
 .quick-title { font-size: 16px; font-weight: 500; margin-bottom: 10px; }
 .kpis { gap: 6px 24px; }
 @media (max-width: 600px) { .quick .fields { grid-template-columns: 1fr 1fr; gap: 12px 16px; } .quick .field input { font-size: 20px; } .quick .unit { font-size: 12.5px; } }
+
+/* desktop: bucket and lever buttons share the first screen */
+@media (min-width: 960px) {
+  .top { padding-top: 20px; }
+  .main { padding-top: 8px; }
+  .hero { padding-top: 0; }
+  .hero h1 { font-size: clamp(36px, 3.6vw, 56px); }
+  .scene .bucket { max-height: max(420px, calc(100vh - 250px)); width: auto; max-width: 100%; margin: 0 auto; }
+  .verdict { margin-top: 24px; }
+  .levers { padding-top: 4px; }
+  .patch-btn { padding: 10px 14px; }
+}

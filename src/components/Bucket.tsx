@@ -176,7 +176,7 @@ export function Bucket({ base, shown, inputs: q, lever, scaleMax, unit }: Props)
       {label(440, 716, 'Churn mensile', pct(q.c, 1), 'middle', 'c')}
       {label(604, 150, 'Expansion', `+${pct(q.e, 1)}/mese`, 'middle', 'e')}
       {label(770, 560, 'Referral', `${num(last.referredUsers)}/mese`, 'end', 'ref')}
-      {lever === 'ARPA' && label(340, 236, 'ARPA', `€${num(q.ARPA)}`, 'start', 'ARPA')}
+      {lever === 'ARPA' && label(410, 214, 'ARPA', `€${num(q.ARPA)}`, 'start', 'ARPA')}
     </svg>
   );
 }

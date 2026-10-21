@@ -89,10 +89,6 @@ export default function App() {
         </button>
       </header>
 
-      <p className="banner">
-        <strong className="banner-long">Ordini di grandezza da report pubblici, non i tuoi numeri</strong>
-        <span className="banner-long">: cambiali con i tuoi. I tuoi numeri non vengono salvati né inviati: il calcolo resta nel tuo browser. È solo a scopo dimostrativo.</span>
-      </p>
 
       <main className="main">
         <section className="hero">
@@ -100,6 +96,9 @@ export default function App() {
             Stai versando soldi in un <em>secchio bucato.</em>
           </h1>
           <p className="sub">Guarda da dove perde, poi scegli una toppa.</p>
+          <p className="data-note">
+            <strong>Dati di settore da report pubblici, non i tuoi.</strong> I tuoi numeri non vengono salvati né inviati. Solo demo.
+          </p>
         </section>
         <div className="scene">
           <Bucket base={base} shown={shown} inputs={pushed} lever={lever} scaleMax={scaleMax} unit={UNIT_N[state.type]} />
