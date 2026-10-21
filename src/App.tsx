@@ -34,6 +34,11 @@ export default function App() {
   const pushed = useMemo(() => (row ? pushLever(inputs, row.lever, row.applied) : inputs), [inputs, row]);
   const shown = useMemo(() => (row ? simulate(pushed) : base), [row, pushed, base]);
   const ratio = ltvToCac(pushed);
+  // one scale for every lever, so switching levers never rescales the bucket
+  const scaleMax = useMemo(
+    () => Math.max(base.mrr24, ...plan.rows.map((r) => simulate(pushLever(inputs, r.lever, r.applied)).mrr24)),
+    [inputs, plan, base],
+  );
 
   const { title, accent, sub } = useMemo(() => {
     const goal = eur(plan.target);
@@ -97,7 +102,7 @@ export default function App() {
           <p className="sub">Guarda da dove perde, poi scegli una toppa.</p>
         </section>
         <div className="scene">
-          <Bucket base={base} shown={shown} inputs={pushed} lever={lever} unit={UNIT_N[state.type]} />
+          <Bucket base={base} shown={shown} inputs={pushed} lever={lever} scaleMax={scaleMax} unit={UNIT_N[state.type]} />
         </div>
         <section className="verdict" aria-live="polite">
           <p className="verdict-kicker">{row ? 'Con questa toppa' : 'Con questi numeri'}</p>

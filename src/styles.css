@@ -93,14 +93,14 @@ h1 em { color: var(--accent); }
 .ln.wall { stroke-width: 4; }
 .ln.shape { fill: var(--bg); }
 .knob { fill: var(--bg); stroke: var(--ink); stroke-width: 3; }
-.st { fill: none; stroke-linecap: round; transition: stroke-width 0.6s ease; }
+.st { fill: none; stroke-linecap: round; }
 .st.light { stroke: var(--water-light); }
 .st.mid { stroke: var(--water); }
 .st.up { stroke: var(--upsell); }
 .cac { fill: var(--cac); }
 .spill { fill: var(--water-light); opacity: 0.8; }
-.hole { fill: var(--bg); stroke: var(--ink); stroke-width: 3; transition: r 0.6s ease; }
-.patch { fill: var(--accent); stroke: var(--ink); stroke-width: 3; animation: stick 0.35s ease-out; transform-box: fill-box; transform-origin: center; }
+.hole { fill: var(--bg); stroke: var(--ink); stroke-width: 3; }
+.patch { fill: var(--accent); stroke: var(--ink); stroke-width: 3; animation: stick 0.3s ease-out; transform-box: fill-box; transform-origin: center; }
 .surf { stroke: var(--water-light); stroke-width: 3; }
 .loop { fill: none; stroke: var(--soft); stroke-width: 2.5; stroke-dasharray: 2 7; stroke-linecap: round; }
 .ground { stroke: var(--line); stroke-width: 2; }
@@ -112,7 +112,9 @@ h1 em { color: var(--accent); }
 .fall { animation: fall 1.4s ease-in infinite; }
 @keyframes run { to { stroke-dashoffset: -20; } }
 @keyframes fall { 0% { transform: translateY(-6px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(26px); opacity: 0; } }
-@keyframes stick { from { transform: scale(1.6) rotate(-14deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes stick { from { transform: scale(1.12); opacity: 0; } }
+.was { animation: fade 0.4s ease-out; }
+@keyframes fade { from { opacity: 0; } }
 
 @media (max-width: 700px) {
   .bucket .k { font-size: 22px; }

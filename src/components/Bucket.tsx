@@ -7,6 +7,8 @@ interface Props {
   shown: Result; // numbers the scene shows (after the selected lever, if any)
   inputs: Inputs; // inputs behind `shown`
   lever: Lever | null;
+  /** Highest MRR the scene may show for these inputs: keeps the scale still while levers change. */
+  scaleMax: number;
   unit: string; // what one unit of acquisition is: signup, install, visite…
 }
 
@@ -28,7 +30,7 @@ const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /** Animate an array of numbers towards a target (short ease-out), unless motion is reduced. */
-function useTween(target: number[], ms = 700): number[] {
+function useTween(target: number[], ms = 520): number[] {
   const [value, setValue] = useState(target);
   const from = useRef(target);
   useEffect(() => {
@@ -42,7 +44,7 @@ function useTween(target: number[], ms = 700): number[] {
     let frame = 0;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / ms);
-      const k = 1 - Math.pow(1 - t, 3);
+      const k = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; // ease in-out
       const next = target.map((v, i) => origin[i] + (v - origin[i]) * k);
       from.current = next;
       setValue(next);
@@ -55,18 +57,29 @@ function useTween(target: number[], ms = 700): number[] {
   return value;
 }
 
-export function Bucket({ base, shown, inputs: q, lever, unit }: Props) {
+export function Bucket({ base, shown, inputs: q, lever, scaleMax, unit }: Props) {
   const last = shown.series[shown.series.length - 1];
   const ref = base.mrr24 || 1;
-  const cap = Math.max(base.mrr24, shown.mrr24, 1) * 1.3;
+  const cap = Math.max(scaleMax, base.mrr24, shown.mrr24, 1) * 1.15;
   const yOf = (m: number) => BY1 - 6 - (m / cap) * (BY1 - BY0 - 6);
 
+  // Flows (€ per month), drawn as stream widths.
+  const users = last.paidUsers + last.referredUsers;
+  const wPayingT = flowWidth(last.newCustomers * q.ARPA, ref);
+  // users entering the funnel: always at least as wide as what comes out of it
+  const wUsersT = users > 0 ? Math.max(wPayingT + 6, flowWidth(users * q.ARPA, ref)) : 0;
+  const wJetT = flowWidth(last.lostFirstMonth * q.ARPA, ref);
+  const wDripT = Math.max(3, flowWidth((last.lostLater * q.ARPA) / 3, ref));
+  const wUpsellT = Math.max(3, flowWidth(last.mrrExpansion * q.e * 3, ref));
+
   // Water: one stratum per cohort at month 24, upsell share on top in orange.
+  // Everything that moves goes through one tween, so a lever change is a single smooth motion.
   const share = last.mrr > 0 ? (last.mrr - last.mrrExpansion) / last.mrr : 1;
   const strata = shown.cohortMrr.map((row) => row[row.length - 1] * share);
-  const animated = useTween([...strata, last.mrrExpansion]);
-  const layers = animated.slice(0, -1);
-  const expansion = animated[animated.length - 1];
+  const n = strata.length;
+  const animated = useTween([...strata, last.mrrExpansion, wUsersT, wPayingT, wJetT, wDripT, wUpsellT]);
+  const layers = animated.slice(0, n);
+  const [expansion, wUsers, wPaying, wJet, wDrip, wUpsell] = animated.slice(n);
   const baseTotal = layers.reduce((a, b) => a + b, 0);
   const top = yOf(baseTotal + expansion);
 
@@ -81,14 +94,6 @@ export function Bucket({ base, shown, inputs: q, lever, unit }: Props) {
   });
   water.push(band(yOf(baseTotal), top, 'var(--upsell)', 'up'));
 
-  // Flows (€ per month), drawn as stream widths.
-  const users = last.paidUsers + last.referredUsers;
-  const wPaying = flowWidth(last.newCustomers * q.ARPA, ref);
-  // users entering the funnel: always at least as wide as what comes out of it
-  const wUsers = users > 0 ? Math.max(wPaying + 6, flowWidth(users * q.ARPA, ref)) : 0;
-  const wJet = flowWidth(last.lostFirstMonth * q.ARPA, ref);
-  const wDrip = Math.max(3, flowWidth((last.lostLater * q.ARPA) / 3, ref));
-  const wUpsell = Math.max(3, flowWidth(last.mrrExpansion * q.e * 3, ref));
   const cacDrops = q.N > 0 ? Math.max(1, Math.min(5, Math.round(q.CAC / Math.max(1, q.ARPA * q.gm)))) : 0;
   const spillDrops = users > 0 ? Math.round(6 * (1 - q.act)) : 0;
 
@@ -116,7 +121,7 @@ export function Bucket({ base, shown, inputs: q, lever, unit }: Props) {
         <path key={i} className="cac fall" style={{ animationDelay: `${i * 0.35}s` }}
           d={`M${168 + i * 24},${106 + (i % 2) * 14} q-6,10 0,15 q6,-5 0,-15z`} />
       ))}
-      {wUsers > 0 && <path className="st light flow" d="M322,124 V196" strokeWidth={wUsers} />}
+      {wUsers > 0.5 && <path className="st light flow" d="M322,124 V196" strokeWidth={wUsers} />}
 
       {/* aha moment funnel: users who don't activate fly off the lip */}
       <path className="ln shape" d="M246,190 H398 L332,244 V264 H312 V244 Z" />
@@ -124,7 +129,7 @@ export function Bucket({ base, shown, inputs: q, lever, unit }: Props) {
         const t = i / Math.max(1, spillDrops - 1);
         return <circle key={i} className="spill" cx={236 - t * 50} cy={206 + t * 150} r={5 - t * 1.5} />;
       })}
-      {wPaying > 0 && <path className="st mid flow" d={`M322,266 V${top + 2}`} strokeWidth={wPaying} />}
+      {wPaying > 0.5 && <path className="st mid flow" d={`M322,266 V${top + 2}`} strokeWidth={wPaying} />}
 
       {/* upsell tap, other colour */}
       <path className="ln" d="M660,204 H572 q-14,0 -14,14 V230" />
@@ -144,7 +149,7 @@ export function Bucket({ base, shown, inputs: q, lever, unit }: Props) {
       <path className="ln wall" d={`M${BX0 - 10},${BY0} L${xl(BY1)},${BY1 - 16} q2,16 20,16 H${xr(BY1) - 20} q18,0 20,-16 L${BX1 + 10},${BY0}`} />
 
       {/* big hole: customers lost after their first month */}
-      {wJet > 0 && <path className="st mid flow" d={`M${hx - 4},${hy} C${hx - 54},${hy} ${hx - 86},${hy + 40} ${hx - 96},680`} strokeWidth={wJet} />}
+      {wJet > 0.5 && <path className="st mid flow" d={`M${hx - 4},${hy} C${hx - 54},${hy} ${hx - 86},${hy + 40} ${hx - 96},680`} strokeWidth={wJet} />}
       <circle className="hole" cx={hx} cy={hy} r={Math.max(8, wJet / 2 + 4)} />
       {lever === 'r1' && <rect className="patch" x={hx - 13} y={hy - 30} width="26" height="34" rx="7" transform={`rotate(-6 ${hx} ${hy})`} />}
 
