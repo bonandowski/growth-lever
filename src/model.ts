@@ -272,3 +272,52 @@ export function insight(p: Inputs, H: number = HORIZON): Insight {
   if (x === null) return { kind: 'beyond', lever: top.lever, ref: second.lever };
   return { kind: 'equivalent', lever: top.lever, ref: second.lever, x };
 }
+
+export interface PlanRow {
+  lever: Lever;
+  /** Relative push that reaches the target; null if the lever can't get there on its own. */
+  x: number | null;
+  /** Pushing this lever lowers value (e.g. buying more low-intent users). */
+  harmful: boolean;
+  /** Push actually applied when the row is selected: x, or the largest useful push. */
+  applied: number;
+}
+
+export interface EqualGainPlan {
+  target: number; // value gain every row aims for
+  rows: PlanRow[]; // in LEVERS order
+}
+
+/**
+ * Same goal for every lever: the gain of the strongest +10% push. Each row says how far that
+ * lever alone must move to match it, so levers are compared on the move they need, not on an
+ * equal relative push (which always favours activation and price).
+ */
+export function equalGainPlan(p: Inputs, H: number = HORIZON): EqualGainPlan {
+  const impacts = leverImpacts(p, 0.1, H);
+  const target = Math.max(0, impacts[0]?.delta ?? 0);
+  const rows = LEVERS.map((lever) => {
+    const impact = impacts.find((i) => i.lever === lever)!;
+    const harmful = impact.delta < 0;
+    const x = target > 0 && !harmful ? equivalentPush(p, lever, target, H) : null;
+    const applied = x ?? (harmful ? 0.1 : Math.min(maxPush(p, lever), 1));
+    return { lever, x, harmful, applied };
+  });
+  return { target, rows };
+}
+
+/** Margin a paying customer brings over horizon + tail (5 years by default). */
+export function customerLtv(p: Inputs, months: number = HORIZON + TAIL): number {
+  let ltv = 0;
+  for (let a = 0; a < months; a++) ltv += survival(a, p.r1, p.c) * p.ARPA * Math.pow(1 + p.e, a) * p.gm;
+  return ltv;
+}
+
+/** LTV over what one paying customer cost to acquire (paid users only: referrals are free). */
+export function ltvToCac(p: Inputs): number | null {
+  const cost = p.act > 0 ? p.CAC / p.act : 0;
+  return cost > 0 ? customerLtv(p) / cost : null;
+}
+
+/** Yearly net revenue retention of customers past their first month: churn and upsell. */
+export const nrr12 = (p: Inputs) => Math.pow((1 - p.c) * (1 + p.e), 12);

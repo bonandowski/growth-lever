@@ -1,4 +1,4 @@
-import type { Lever } from './model';
+import type { Inputs, Lever } from './model';
 import type { PresetKey } from './presets';
 
 // All user-facing text lives here. The site is Italian only.
@@ -98,7 +98,58 @@ export const ASSUMPTIONS = [
   'Con +10% di acquisizione, gli utenti in più hanno metà dell’activation attuale: spesso sono meno interessati.',
   'Dopo la retention M1 il churn è costante. Nessuna stagionalità, nessun limite di mercato, prezzo e margine fissi.',
   'L’expansion fa crescere l’ARPA dei clienti attivi, ogni mese della stessa percentuale.',
-  'Confronto le leve sul valore creato: gross margin meno CAC nei 24 mesi, più il margine che i clienti ancora attivi daranno nei 36 mesi dopo. Niente attualizzazione.',
+  'Valore a 5 anni: gross margin meno CAC nei primi 24 mesi, più il margine che i clienti ancora attivi daranno nei 36 mesi dopo. Niente attualizzazione.',
+  'Non confronto le leve con lo stesso +10%: spostarle non costa uguale. Fisso un obiettivo (quanto vale +10% sulla leva più forte) e calcolo di quanto andrebbe mossa ciascuna leva, da sola, per raggiungerlo. Quale sia più facile da muovere lo sai tu.',
+  'LTV/CAC: margine di un cliente pagante in 5 anni diviso quanto è costato acquisirlo (CAC diviso activation). NRR annuo: ricavo che resta dopo 12 mesi dai clienti già oltre il primo mese, con churn ed expansion.',
   'Il browser ricorda solo una cosa: che hai già visto il finto paywall (localStorage, nessun dato). I tuoi numeri non vengono salvati.',
   'I numeri di partenza sono ordini di grandezza da report pubblici, arrotondati: non sono i tuoi e non sono una previsione.',
 ];
+
+/** Short technical name of each lever, used on buttons and in sentences. */
+export const LEVER_NAME: Record<Lever, string> = {
+  N: 'Acquisizione',
+  CAC: 'CAC',
+  act: 'Activation',
+  ARPA: 'ARPA',
+  r1: 'Retention M1',
+  c: 'Churn',
+  e: 'Expansion',
+  ref: 'Referral',
+};
+
+const pctFmt = (v: number, digits: number) =>
+  `${(v * 100).toLocaleString('it-IT', { minimumFractionDigits: digits, maximumFractionDigits: digits })}%`;
+const euro = (v: number) =>
+  `€${v.toLocaleString('it-IT', { maximumFractionDigits: v < 10 ? 2 : 0, useGrouping: 'always' } as Intl.NumberFormatOptions)}`;
+
+/** A lever's value in its own unit: "3,5%", "€30", "2.000 signup". */
+export function leverValue(lever: Lever, p: Inputs, type: PresetKey): string {
+  switch (lever) {
+    case 'N':
+      return `${Math.round(p.N + (p.boost ?? 0)).toLocaleString('it-IT', { useGrouping: 'always' } as Intl.NumberFormatOptions)} ${UNIT_N[type]}`;
+    case 'CAC':
+      return euro(p.CAC);
+    case 'ARPA':
+      return euro(p.ARPA);
+    case 'act':
+      return pctFmt(p.act, p.act < 0.3 ? 1 : 0);
+    case 'r1':
+      return pctFmt(p.r1, p.r1 > 0.98 ? 1 : 0);
+    case 'c':
+    case 'e':
+      return pctFmt(p[lever], 1);
+    case 'ref':
+      return `${(p.ref * 100).toLocaleString('it-IT', { maximumFractionDigits: 1 })} ogni 100 clienti`;
+  }
+}
+
+/** "from → to" for a lever, with the unit written once: "30 → 45 opportunità", "3,5% → 3,0%". */
+export function leverMove(lever: Lever, from: Inputs, to: Inputs, type: PresetKey): string {
+  const int = (v: number) => Math.round(v).toLocaleString('it-IT', { useGrouping: 'always' } as Intl.NumberFormatOptions);
+  if (lever === 'N') return `${int(from.N + (from.boost ?? 0))} → ${int(to.N + (to.boost ?? 0))} ${UNIT_N[type]}`;
+  if (lever === 'ref') {
+    const r = (v: number) => (v * 100).toLocaleString('it-IT', { maximumFractionDigits: 1 });
+    return `${r(from.ref)} → ${r(to.ref)} ogni 100 clienti`;
+  }
+  return `${leverValue(lever, from, type)} → ${leverValue(lever, to, type)}`;
+}

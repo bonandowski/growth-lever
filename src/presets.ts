@@ -5,7 +5,7 @@ import type { Inputs } from './model';
 
 export const PRESETS = {
   b2bPlg: { N: 2000, CAC: 30, act: 0.08, ARPA: 50, r1: 0.9, c: 0.035, e: 0.01, ref: 0.02, gm: 0.8 },
-  b2bSales: { N: 60, CAC: 7000, act: 0.22, ARPA: 2500, r1: 0.98, c: 0.01, e: 0.015, ref: 0.005, gm: 0.77 },
+  b2bSales: { N: 30, CAC: 7000, act: 0.22, ARPA: 2500, r1: 0.98, c: 0.01, e: 0.015, ref: 0.005, gm: 0.77 },
   b2cApp: { N: 20000, CAC: 1.25, act: 0.017, ARPA: 10, r1: 0.7, c: 0.1, e: 0.002, ref: 0.02, gm: 0.7 },
   ecommerce: { N: 20000, CAC: 0.9, act: 0.025, ARPA: 40, r1: 0.28, c: 0.1, e: 0.005, ref: 0.02, gm: 0.47 },
   news: { N: 200000, CAC: 0.05, act: 0.002, ARPA: 10, r1: 0.8, c: 0.05, e: 0.005, ref: 0.005, gm: 0.7 },
@@ -37,7 +37,7 @@ export const SOURCES: Record<PresetKey, Source[]> = {
     { metric: 'Gross margin', value: '80%', origin: 'fonte', note: 'mediana software 2025, Aleph × Benchmarkit (via Orb)', url: 'https://www.withorb.com/blog/saas-growth-margin-statistics' },
   ],
   b2bSales: [
-    { metric: 'Opportunità qualificate', value: '60/mese', origin: 'esempio', note: 'dipende dalla dimensione dell’azienda' },
+    { metric: 'Opportunità qualificate', value: '30/mese', origin: 'esempio', note: 'dipende dalla dimensione dell’azienda' },
     { metric: 'Activation (win rate)', value: '22%', origin: 'fonte', note: 'mediana 21–24% su opportunità qualificate (Gong, Salesforce, via The Starr Conspiracy)', url: 'https://www.thestarrconspiracy.com/insights/benchmarks/b2b-go-to-market-strategy-benchmarks-2025' },
     { metric: 'CAC', value: '€7.000 per opportunità', origin: 'derivato', note: 'payback 14–18 mesi nel mid-market (via SaaS Hero)', url: 'https://saashero.net/customer-retention/cac-payback-period-benchmarks-saas/' },
     { metric: 'ARPA', value: '€2.500/mese', origin: 'esempio', note: 'contratto da ~€30K l’anno' },

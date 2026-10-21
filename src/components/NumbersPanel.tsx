@@ -3,12 +3,22 @@ import type { Inputs } from '../model';
 import { FIELDS, PRESET_LABEL, UNIT_N, UNIT_N_ONE } from '../copy';
 import { PRESET_KEYS, type PresetKey } from '../presets';
 
-interface Props {
+type FieldKey = (typeof FIELDS)[number]['key'];
+
+/** The four numbers people know by heart: shown right under the bucket. */
+export const QUICK_KEYS: FieldKey[] = ['N', 'act', 'ARPA', 'c'];
+export const ADVANCED_KEYS: FieldKey[] = ['CAC', 'r1', 'e', 'ref', 'gm'];
+
+interface FieldsProps {
   type: PresetKey;
   inputs: Inputs;
+  keys: FieldKey[];
+  onChange: (p: Inputs) => void;
+}
+
+interface Props extends FieldsProps {
   preset: PresetKey | null;
   onPreset: (k: PresetKey) => void;
-  onChange: (p: Inputs) => void;
 }
 
 type Field = (typeof FIELDS)[number];
@@ -44,7 +54,24 @@ function NumberField({ field, label, unit, value, onCommit }: { field: Field; la
   );
 }
 
-export function NumbersPanel({ type, inputs, preset, onPreset, onChange }: Props) {
+export function NumberFields({ type, inputs, keys, onChange }: FieldsProps) {
+  return (
+    <div className="fields">
+      {FIELDS.filter((f) => keys.includes(f.key)).map((f) => (
+        <NumberField
+          key={f.key}
+          field={f}
+          label={f.key === 'N' ? `Acquisizione: ${UNIT_N[type]} al mese` : f.key === 'CAC' ? `CAC: costo per ${UNIT_N_ONE[type]}` : f.label}
+          unit={f.key === 'N' ? UNIT_N[type] : f.unit}
+          value={inputs[f.key]}
+          onCommit={(v) => onChange({ ...inputs, [f.key]: v })}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function NumbersPanel({ type, inputs, keys, preset, onPreset, onChange }: Props) {
   return (
     <div className="numbers">
       <div className="presets" role="group" aria-label="Esempi">
@@ -54,16 +81,7 @@ export function NumbersPanel({ type, inputs, preset, onPreset, onChange }: Props
           </button>
         ))}
       </div>
-      <div className="fields">
-        {FIELDS.map((f) => (
-          <NumberField
-            key={f.key}
-            field={f}
-            label={f.key === 'N' ? `Acquisizione: ${UNIT_N[type]} al mese` : f.key === 'CAC' ? `CAC: costo per ${UNIT_N_ONE[type]}` : f.label}
-            unit={f.key === 'N' ? UNIT_N[type] : f.unit}
-            value={inputs[f.key]} onCommit={(v) => onChange({ ...inputs, [f.key]: v })} />
-        ))}
-      </div>
+      <NumberFields type={type} inputs={inputs} keys={keys} onChange={onChange} />
     </div>
   );
 }

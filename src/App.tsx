@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { equivalentPush, insight, leverImpacts, pushLever, simulate, type Lever } from './model';
-import { ASSUMPTIONS, LEVER_SUBJECT, PRESET_LABEL, UNIT_N, refPhrase } from './copy';
-import { eur } from './format';
+import { equalGainPlan, ltvToCac, nrr12, pushLever, simulate } from './model';
+import { ASSUMPTIONS, LEVER_NAME, PRESET_LABEL, UNIT_N, leverMove, leverValue } from './copy';
+import { eur, pct } from './format';
 import { PRESETS, SOURCES, type PresetKey } from './presets';
 import { readState, sanitize, writeState, type AppState } from './url';
 import { Bucket } from './components/Bucket';
 import { LeverButtons } from './components/LeverButtons';
-import { NumbersPanel } from './components/NumbersPanel';
+import { ADVANCED_KEYS, NumberFields, NumbersPanel, QUICK_KEYS } from './components/NumbersPanel';
 import { Onboarding } from './components/Onboarding';
 import { Paywall, markPaywallSeen, paywallSeen } from './components/Paywall';
 
@@ -29,37 +29,43 @@ export default function App() {
   };
 
   const base = useMemo(() => simulate(inputs), [inputs]);
-  const impacts = useMemo(() => leverImpacts(inputs), [inputs]);
-  const pushed = useMemo(() => (lever ? pushLever(inputs, lever, 0.1) : inputs), [inputs, lever]);
-  const shown = useMemo(() => (lever ? simulate(pushed) : base), [lever, pushed, base]);
+  const plan = useMemo(() => equalGainPlan(inputs), [inputs]);
+  const row = lever ? plan.rows.find((r) => r.lever === lever)! : null;
+  const pushed = useMemo(() => (row ? pushLever(inputs, row.lever, row.applied) : inputs), [inputs, row]);
+  const shown = useMemo(() => (row ? simulate(pushed) : base), [row, pushed, base]);
+  const ratio = ltvToCac(pushed);
 
   const { title, accent, sub } = useMemo(() => {
-    if (lever) {
-      const impact = impacts.find((i) => i.lever === lever)!;
-      const d = impact.delta;
-      const mrr = `L’MRR al mese 24 passa da ${eur(base.mrr24)} a ${eur(shown.mrr24)}.`;
-      if (impact.capped && d <= 0) return { title: `${LEVER_SUBJECT[lever]} qui non si può:`, accent: 'è già al massimo.', sub: '' };
-      if (d < 0) return { title: `${LEVER_SUBJECT[lever]} qui`, accent: `toglie ${eur(-d)} di valore.`, sub: 'Gli utenti in più costano e hanno activation bassa. Prima lavora su retention e activation.' };
-      if (d === 0) return { title: `${LEVER_SUBJECT[lever]} qui`, accent: 'non sposta niente.', sub: '' };
-      const ref: Lever = lever === 'CAC' ? (impacts.find((i) => i.lever !== 'CAC' && i.delta > 0)?.lever ?? 'N') : 'CAC';
-      const x = equivalentPush(inputs, ref, d);
-      const accentText = x === null ? `più di qualsiasi ${ref === 'CAC' ? 'riduzione del CAC' : 'spinta su una leva sola'}.` : `${refPhrase(ref, x)}.`;
-      return { title: `${LEVER_SUBJECT[lever]} vale quanto`, accent: accentText, sub: `+${eur(d)} di valore creato. ${mrr}` };
+    const goal = eur(plan.target);
+    const mrr = `MRR al mese 24 da ${eur(base.mrr24)} a ${eur(shown.mrr24)}.`;
+    if (row) {
+      const name = LEVER_NAME[row.lever];
+      const from = leverValue(row.lever, inputs, state.type);
+      const to = leverValue(row.lever, pushed, state.type);
+      const gain = shown.value - base.value;
+      if (row.harmful)
+        return {
+          title: `${name} +10% qui`,
+          accent: `toglie ${eur(-gain)} di valore.`,
+          sub: 'Gli utenti in più costano e attivano meno: il secchio perde più di quanto entra.',
+        };
+      if (row.x === null)
+        return {
+          title: `${name} da sola non ci arriva:`,
+          accent: `anche da ${from} a ${to} vale ${eur(gain)}.`,
+          sub: `L’obiettivo è ${goal}. ${mrr}`,
+        };
+      return { title: `${name} ${leverMove(row.lever, inputs, pushed, state.type)}:`, accent: `+${goal} di valore in 5 anni.`, sub: mrr };
     }
-    const i = insight(inputs);
-    const value = `È la leva più forte con questi numeri. Oggi il secchio crea ${eur(base.value)} di valore: prova le altre qui sotto.`;
-    switch (i.kind) {
-      case 'equivalent':
-        return { title: `${LEVER_SUBJECT[i.lever]} vale quanto`, accent: `${refPhrase(i.ref, i.x)}.`, sub: value };
-      case 'beyond':
-        return { title: LEVER_SUBJECT[i.lever], accent: 'vale più di qualsiasi riduzione del CAC.', sub: value };
-      case 'acquisitionHurts':
-        return { title: 'Qui più acquisizione', accent: 'distrugge valore.', sub: `Il secchio perde troppo. Prima: ${LEVER_SUBJECT[i.lever]}.` };
-      default:
-        return { title: 'Il secchio è vuoto:', accent: 'senza utenti non c’è niente da spingere.', sub: 'Inserisci i tuoi numeri qui sotto.' };
-    }
-  }, [lever, impacts, inputs, base, shown]);
-
+    if (plan.target <= 0)
+      return { title: 'Il secchio è vuoto:', accent: 'senza utenti non c’è niente da spingere.', sub: 'Inserisci i tuoi numeri qui sotto.' };
+    const harmful = plan.rows.some((r) => r.harmful);
+    return {
+      title: `Per creare +${goal} di valore in 5 anni basta una toppa.`,
+      accent: 'Scegli quella che per te costa meno spostare.',
+      sub: `Ogni pulsante dice di quanto va mossa quella leva, da sola, per arrivarci.${harmful ? ' Più acquisizione invece qui toglie valore.' : ''}`,
+    };
+  }, [row, plan, inputs, pushed, base, shown, state.type]);
 
   if (state.onboarding) {
     return (
@@ -88,26 +94,29 @@ export default function App() {
           <h1>
             Stai versando soldi in un <em>secchio bucato.</em>
           </h1>
-          <p className="sub">Guarda da dove perde, poi premi una toppa.</p>
+          <p className="sub">Guarda da dove perde, poi scegli una toppa.</p>
         </section>
         <div className="scene">
           <Bucket base={base} shown={shown} inputs={pushed} lever={lever} unit={UNIT_N[state.type]} />
         </div>
         <section className="verdict" aria-live="polite">
-          <p className="verdict-kicker">{lever ? 'Con questa toppa' : 'Con questi numeri'}</p>
+          <p className="verdict-kicker">{row ? 'Con questa toppa' : 'Con questi numeri'}</p>
           <p className="verdict-text">
             {title} <em>{accent}</em>
           </p>
           {sub && <p className="verdict-sub">{sub}</p>}
           <dl className="kpis">
-            <div><dt>MRR mese 12</dt><dd>{eur(shown.mrr12)}</dd></div>
             <div><dt>MRR mese 24</dt><dd>{eur(shown.mrr24)}</dd></div>
+            <div><dt>LTV/CAC</dt><dd>{ratio === null ? '—' : ratio.toLocaleString('it-IT', { maximumFractionDigits: 1 })}</dd></div>
             <div><dt>Payback CAC</dt><dd>{shown.payback === null ? 'oltre 24 mesi' : `${shown.payback} mesi`}</dd></div>
+            <div><dt>NRR annuo</dt><dd>{pct(nrr12(pushed))}</dd></div>
           </dl>
         </section>
         <div className="levers-area">
         <LeverButtons
-          impacts={impacts}
+          rows={plan.rows}
+          inputs={inputs}
+          type={state.type}
           selected={lever}
           onSelect={(l) => {
             setState((s) => ({ ...s, lever: l }));
@@ -131,13 +140,23 @@ export default function App() {
       </div>
 
       <div className="extras">
+        <section className="quick" aria-labelledby="quick-title">
+          <h2 id="quick-title" className="quick-title">Metti i tuoi numeri</h2>
+          <NumberFields
+            type={state.type}
+            inputs={inputs}
+            keys={QUICK_KEYS}
+            onChange={(p) => setState((s) => ({ ...s, preset: null, inputs: sanitize(p) }))}
+          />
+        </section>
         <button type="button" className="link" aria-expanded={panel} aria-controls="numbers" onClick={() => setPanel((v) => !v)}>
-          {panel ? 'Chiudi i numeri' : 'Usa i miei numeri'}
+          {panel ? 'Chiudi' : 'Altri numeri ed esempi'}
         </button>
         <div id="numbers" hidden={!panel}>
           <NumbersPanel
             type={state.type}
             inputs={inputs}
+            keys={ADVANCED_KEYS}
             preset={state.preset}
             onPreset={(k) => setState((s) => ({ ...s, type: k, preset: k, inputs: { ...PRESETS[k] } }))}
             onChange={(p) => setState((s) => ({ ...s, preset: null, inputs: sanitize(p) }))}

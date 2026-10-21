@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   HORIZON,
   LEVERS,
+  equalGainPlan,
   equivalentPush,
+  ltvToCac,
+  nrr12,
   insight,
   leverImpacts,
   objective,
@@ -152,5 +155,47 @@ describe('business presets', () => {
     expect(p.e).toBeLessThanOrEqual(0.1);
     expect(p.ref).toBeLessThanOrEqual(0.1);
     expect(Number.isFinite(r.value)).toBe(true);
+  });
+});
+
+describe('equalGainPlan', () => {
+  it.each(Object.entries(PRESETS))('%s: every reachable lever hits the same target', (_, p) => {
+    const plan = equalGainPlan(p);
+    const before = objective(p);
+    expect(plan.target).toBeGreaterThan(0);
+    for (const row of plan.rows) {
+      if (row.x === null || row.harmful) continue;
+      const gain = objective(pushLever(p, row.lever, row.x)) - before;
+      expect(Math.abs(gain - plan.target) / plan.target).toBeLessThan(0.001);
+    }
+  });
+
+  it('the strongest lever needs exactly the reference 10%', () => {
+    const plan = equalGainPlan(base);
+    expect(Math.min(...plan.rows.filter((r) => r.x !== null).map((r) => r.x!))).toBeCloseTo(0.1, 4);
+  });
+
+  it('flags levers that cannot get there alone and levers that destroy value', () => {
+    const capped = equalGainPlan({ ...base, r1: 1 }).rows.find((r) => r.lever === 'r1')!;
+    expect(capped.x).toBeNull();
+    const hurt = equalGainPlan({ ...base, CAC: 5000 }).rows.find((r) => r.lever === 'N')!;
+    expect(hurt.harmful).toBe(true);
+  });
+
+  it('is empty when nothing can grow', () => {
+    expect(equalGainPlan({ ...base, N: 0, ref: 0 }).target).toBe(0);
+  });
+});
+
+describe('unit economics', () => {
+  it('LTV/CAC uses the cost of a paying customer', () => {
+    const p = { ...base, r1: 1, c: 0, e: 0, ARPA: 10, gm: 1, CAC: 60, act: 0.5 };
+    expect(ltvToCac(p)).toBeCloseTo((10 * 60) / 120); // 60 months of €10 over €120
+    expect(ltvToCac({ ...base, CAC: 0 })).toBeNull();
+  });
+
+  it('NRR combines churn and expansion over a year', () => {
+    expect(nrr12({ ...base, c: 0, e: 0 })).toBe(1);
+    expect(nrr12({ ...base, c: 0.01, e: 0.015 })).toBeGreaterThan(1);
   });
 });

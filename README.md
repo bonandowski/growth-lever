@@ -2,7 +2,7 @@
 
 Un simulatore delle leve di crescita per prodotti in abbonamento (B2B e SMB). Risponde a una domanda: **con i miei numeri, dove conviene spingere?**
 
-Il prodotto è un secchio. Entrano utenti (acquisizione, a un CAC), solo una parte arriva all'aha moment e paga (activation), i clienti escono (churn M1 e churn mensile), quelli che restano crescono (expansion) e portano altri utenti gratis (referral). Gli otto pulsanti sotto la scena applicano un +10% a una leva alla volta e mostrano quanto vale, anche rispetto a una riduzione del CAC.
+Il prodotto è un secchio. Entrano utenti (acquisizione, a un CAC), solo una parte arriva all'aha moment e paga (activation), i clienti escono (churn M1 e churn mensile), quelli che restano crescono (expansion) e portano altri utenti gratis (referral). Gli otto pulsanti sotto la scena dicono di quanto va mossa ciascuna leva per ottenere lo stesso risultato; premerne uno applica quella mossa al secchio.
 
 Si parte da una schermata che chiede il tipo di business: SaaS B2B product-led, SaaS B2B sales-led, app B2C in abbonamento, e-commerce D2C, news con abbonamento. Ogni tipo carica ordini di grandezza presi da report pubblici, arrotondati e con fonte. Ogni numero è segnato come *fonte*, *derivato* (calcolato da un benchmark), *stima* (nessuna fonte affidabile) o *esempio* (dipende dalla dimensione dell'azienda). La tabella con i link è in pagina, sotto "Come ragiona il modello", ed è definita in `src/presets.ts`. Un link con `?p=<tipo>` salta l'onboarding.
 
@@ -38,7 +38,9 @@ Mese per mese, per 24 mesi:
 - un cliente di età *a* resta con probabilità 1 per *a* = 0, retention M1 × (1 − churn)^(*a*−1) dopo;
 - ricavo per cliente = ARPA × (1 + expansion)^*a*.
 
-Le leve si confrontano sul **valore creato**: margine lordo meno CAC nei 24 mesi, più il margine che i clienti ancora attivi al mese 24 daranno nei 36 mesi successivi. Con +10% di acquisizione, gli utenti in più hanno metà dell'activation attuale. Tutte le ipotesi sono anche nella pagina, sotto "Come ragiona il modello".
+Il risultato si misura in **valore a 5 anni**: margine lordo meno CAC nei 24 mesi, più il margine che i clienti ancora attivi al mese 24 daranno nei 36 mesi successivi.
+
+Le leve **non** si confrontano con lo stesso +10%, perché spostarle non costa uguale (e così vincerebbero sempre activation e prezzo). Il tool fissa un obiettivo, cioè quanto vale +10% sulla leva più forte, e per ogni leva calcola con una bisezione di quanto andrebbe mossa, da sola, per raggiungerlo: per esempio churn 3,5% → 3,0%, CAC €30 → €21. Quale mossa sia più facile lo decide chi usa il tool. Accanto: MRR al mese 24, LTV/CAC, payback e NRR annuo. Con +10% di acquisizione, gli utenti in più hanno metà dell'activation attuale. Tutte le ipotesi sono anche nella pagina, sotto "Come ragiona il modello".
 
 ## Deploy su Vercel
 
